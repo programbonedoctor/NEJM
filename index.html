@@ -1,0 +1,163 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEJM 한국어 뉴스</title>
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #1f2937;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    .article {
+      background-color: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .article h2 {
+      font-size: 1.25rem;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+    .article p {
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+    }
+    .article a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .article a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NEJM 한국어 뉴스</h1>
+    <div class="article">
+      <h2>암 치료의 새로운 발전</h2>
+      <p>원제: New Advances in Cancer Treatment</p>
+      <p>NEJM에 게재된 최근 연구는 폐암에 대한 면역요법의 획기적인 발전을 강조합니다.</p>
+      <p>게재일: 2025-07-01</p>
+      <a href="https://www.nejm.org/example1" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>심혈관 질환 예방</h2>
+      <p>원제: Cardiovascular Disease Prevention</p>
+      <p>최신 NEJM 호에서 심혈관 질환 예방을 위한 새로운 지침이 논의되었습니다.</p>
+      <p>게재일: 2025-06-28</p>
+      <a href="https://www.nejm.org/example2" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>당뇨병 관리의 혁신</h2>
+      <p>원제: Innovations in Diabetes Care</p>
+      <p>NEJM의 최신 연구는 당뇨병 환자를 위한 새로운 치료법을 소개합니다.</p>
+      <p>게재일: 2025-06-20</p>
+      <a href="https://www.nejm.org/example3" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>신경계 질환 연구</h2>
+      <p>원제: Advances in Neurological Research</p>
+      <p>NEJM에 게재된 논문은 알츠하이머병 치료의 새로운 가능성을 탐구합니다.</p>
+      <p>게재일: 2025-06-15</p>
+      <a href="https://www.nejm.org/example4" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>감염병 대응 전략</h2>
+      <p>원제: Strategies for Infectious Disease Control</p>
+      <p>NEJM 연구는 전염병 예방을 위한 새로운 백신 전략을 제안합니다.</p>
+      <p>게재일: 2025-06-10</p>
+      <a href="https://www.nejm.org/example5" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>소아 질환의 최신 치료법</h2>
+      <p>원제: Latest Treatments for Pediatric Diseases</p>
+      <p>NEJM 논문은 소아 환자를 위한 새로운 치료법을 다룹니다.</p>
+      <p>게재일: 2025-06-05</p>
+      <a href="https://www.nejm.org/example6" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>정신 건강 개선 연구</h2>
+      <p>원제: Research on Mental Health Improvement</p>
+      <p>NEJM의 연구는 우울증 치료를 위한 새로운 접근법을 제시합니다.</p>
+      <p>게재일: 2025-06-01</p>
+      <a href="https://www.nejm.org/example7" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>심장 수술의 발전</h2>
+      <p>원제: Advances in Cardiac Surgery</p>
+      <p>NEJM에 게재된 논문은 심장 수술 기술의 최신 발전을 다룹니다.</p>
+      <p>게재일: 2025-05-28</p>
+      <a href="https://www.nejm.org/example8" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>간 질환 치료 혁신</h2>
+      <p>원제: Innovations in Liver Disease Treatment</p>
+      <p>NEJM 연구는 간 질환 치료를 위한 새로운 약물을 소개합니다.</p>
+      <p>게재일: 2025-05-20</p>
+      <a href="https://www.nejm.org/example9" target="_blank">원문 보기</a>
+    </div>
+    <div class="article">
+      <h2>호흡기 질환 연구</h2>
+      <p>원제: Research on Respiratory Diseases</p>
+      <p>NEJM 논문은 만성 폐쇄성 폐질환 치료의 새로운 가능성을 탐구합니다.</p>
+      <p>게재일: 2025-05-15</p>
+      <a href="https://www.nejm.org/example10" target="_blank">원문 보기</a>
+    </div>
+  </div>
+</body>
+</html>
