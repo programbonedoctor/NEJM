@@ -110,17 +110,13 @@
   </div>
 
   <script>
-    // 설정
-    const DEEPL_API_KEY = 'your-actual-deepl-api-key'; // DeepL API 키 입력
-    const RSS_FEED_URL = 'https://www.nejm.org/action/showFeed?type=mr&feed=rss';
-    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
     let page = 1;
     const perPage = 3;
     let isLoading = false;
     let hasMore = true;
     let allArticles = [];
 
-    // 더미 데이터 (RSS 호출 실패 시 대비)
+    // 더미 데이터 (오류 시 대비)
     function generateDummyArticles(page, perPage) {
       const articles = [];
       for (let i = 1; i <= perPage; i++) {
@@ -138,36 +134,36 @@
       return articles;
     }
 
-    // DeepL API로 번역
+    // DeepL 번역
     async function translateText(text) {
       try {
-        const response = await fetch(`${CORS_PROXY}https://api-free.deepl.com/v2/translate`, {
+        const response = await fetch('/.netlify/functions/translate', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `DeepL-Auth-Key ${DEEPL_API_KEY}`
-          },
-          body: new URLSearchParams({
-            text: text,
-            target_lang: 'KO'
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
         });
-        if (!response.ok) throw new Error(`DeepL API error: ${response.status}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Translate error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        }
         const data = await response.json();
         return data.translations[0].text;
       } catch (error) {
         console.error('Translation error:', error);
-        document.getElementById('error').textContent = '번역 중 오류가 발생했습니다. 원문 표시.';
+        document.getElementById('error').textContent = '번역 오류. 원문 표시.';
         document.getElementById('error').style.display = 'block';
-        return text; // 오류 시 원문 반환
+        return text;
       }
     }
 
-    // RSS 피드 파싱
+    // RSS 피드 가져오기
     async function fetchArticles() {
       try {
-        const response = await fetch(`${CORS_PROXY}${RSS_FEED_URL}`);
-        if (!response.ok) throw new Error(`RSS fetch error: ${response.status}`);
+        const response = await fetch('/.netlify/functions/fetch-rss');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`RSS error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        }
         const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, 'text/xml');
@@ -181,7 +177,6 @@
           const pubDate = item.querySelector('pubDate')?.textContent || 'No date';
           const link = item.querySelector('link')?.textContent || '#';
 
-          // 번역
           const koreanTitle = await translateText(title);
           const koreanSummary = await translateText(description);
 
@@ -198,9 +193,9 @@
         return articles;
       } catch (error) {
         console.error('RSS fetch error:', error);
-        document.getElementById('error').textContent = '기사를 불러오는 데 실패했습니다. 더미 데이터 사용.';
+        document.getElementById('error').textContent = '기사 불러오기 실패. 더미 데이터 사용.';
         document.getElementById('error').style.display = 'block';
-        return generateDummyArticles(1, perPage); // 오류 시 더미 데이터
+        return generateDummyArticles(1, perPage);
       }
     }
 
@@ -230,41 +225,9 @@
 
       if (page === 1) {
         allArticles = await fetchArticles();
-      }
-
-      const start = (page - 1) * perPage;
-      const end = start + perPage;
-      const newArticles = allArticles.slice(start, end);
-
-      if (newArticles.length > 0) {
-        renderArticles(newArticles);
-        page++;
-      }
-
-      if (end >= allArticles.length) {
-        hasMore = false;
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('no-more').style.display = 'block';
-      } else {
-        isLoading = false;
-        document.getElementById('loading').style.display = 'none';
-      }
-    }
-
-    // Intersection Observer
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoading) {
-          loadArticles();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(document.getElementById('loading'));
-
-    // 초기 로드
-    loadArticles();
-  </script>
-</body>
-</html>
+        if (allArticles.length === 0) {
+          hasMore = false;
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('no-more').style.display = 'block';
+          document.getElementById('error').textContent = '기사를 불러올 수 없습니다.';
+          document.getElementById('error
