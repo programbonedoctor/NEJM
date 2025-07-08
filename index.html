@@ -110,18 +110,35 @@
   </div>
 
   <script>
-    // DeepL API 키 (발급받은 키로 교체)
-    const DEEPL_API_KEY = '377ab2dc-88e7-42e5-a2b3-bc5f2735ed7f:fx'; // 여기에 DeepL API 키 입력
+    // 설정
+    const DEEPL_API_KEY = 'your-actual-deepl-api-key'; // DeepL API 키 입력
     const RSS_FEED_URL = 'https://www.nejm.org/action/showFeed?type=mr&feed=rss';
-    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/'; // CORS 프록시
-
+    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
     let page = 1;
     const perPage = 3;
     let isLoading = false;
     let hasMore = true;
     let allArticles = [];
 
-    // DeepL API로 텍스트 번역
+    // 더미 데이터 (RSS 호출 실패 시 대비)
+    function generateDummyArticles(page, perPage) {
+      const articles = [];
+      for (let i = 1; i <= perPage; i++) {
+        const id = (page - 1) * perPage + i;
+        articles.push({
+          id,
+          title: `Article ${id}: New Medical Research`,
+          koreanTitle: `기사 ${id}: 새로운 의학 연구`,
+          summary: `This is a summary of article ${id} from NEJM, discussing medical advancements.`,
+          koreanSummary: `NEJM의 기사 ${id} 요약, 의학 발전에 대해 논의합니다.`,
+          date: `2025-07-${String((30 - id) % 30 + 1).padStart(2, '0')}`,
+          url: `https://www.nejm.org/example${id}`
+        });
+      }
+      return articles;
+    }
+
+    // DeepL API로 번역
     async function translateText(text) {
       try {
         const response = await fetch(`${CORS_PROXY}https://api-free.deepl.com/v2/translate`, {
@@ -135,10 +152,13 @@
             target_lang: 'KO'
           })
         });
+        if (!response.ok) throw new Error(`DeepL API error: ${response.status}`);
         const data = await response.json();
         return data.translations[0].text;
       } catch (error) {
         console.error('Translation error:', error);
+        document.getElementById('error').textContent = '번역 중 오류가 발생했습니다. 원문 표시.';
+        document.getElementById('error').style.display = 'block';
         return text; // 오류 시 원문 반환
       }
     }
@@ -147,6 +167,7 @@
     async function fetchArticles() {
       try {
         const response = await fetch(`${CORS_PROXY}${RSS_FEED_URL}`);
+        if (!response.ok) throw new Error(`RSS fetch error: ${response.status}`);
         const text = await response.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, 'text/xml');
@@ -155,12 +176,12 @@
         let id = 1;
 
         for (let item of items) {
-          const title = item.querySelector('title').textContent;
-          const description = item.querySelector('description').textContent.replace(/<[^>]+>/g, '');
-          const pubDate = item.querySelector('pubDate').textContent;
-          const link = item.querySelector('link').textContent;
+          const title = item.querySelector('title')?.textContent || 'No title';
+          const description = item.querySelector('description')?.textContent.replace(/<[^>]+>/g, '') || 'No summary';
+          const pubDate = item.querySelector('pubDate')?.textContent || 'No date';
+          const link = item.querySelector('link')?.textContent || '#';
 
-          // DeepL로 번역
+          // 번역
           const koreanTitle = await translateText(title);
           const koreanSummary = await translateText(description);
 
@@ -170,16 +191,16 @@
             koreanTitle,
             summary: description,
             koreanSummary,
-            date: new Date(pubDate).toLocaleDateString('ko-KR'),
+            date: pubDate ? new Date(pubDate).toLocaleDateString('ko-KR') : 'Unknown date',
             url: link
           });
         }
         return articles;
       } catch (error) {
         console.error('RSS fetch error:', error);
-        document.getElementById('error').textContent = '기사를 불러오는 데 실패했습니다.';
+        document.getElementById('error').textContent = '기사를 불러오는 데 실패했습니다. 더미 데이터 사용.';
         document.getElementById('error').style.display = 'block';
-        return [];
+        return generateDummyArticles(1, perPage); // 오류 시 더미 데이터
       }
     }
 
@@ -205,6 +226,7 @@
       if (isLoading || !hasMore) return;
       isLoading = true;
       document.getElementById('loading').style.display = 'block';
+      document.getElementById('error').style.display = 'none';
 
       if (page === 1) {
         allArticles = await fetchArticles();
@@ -229,7 +251,7 @@
       }
     }
 
-    // Intersection Observer로 스크롤 감지
+    // Intersection Observer
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
@@ -241,7 +263,7 @@
 
     observer.observe(document.getElementById('loading'));
 
-    // 초기 기사 로드
+    // 초기 로드
     loadArticles();
   </script>
 </body>
