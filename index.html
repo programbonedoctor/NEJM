@@ -83,82 +83,166 @@
     .article a:hover {
       text-decoration: underline;
     }
+    .loading {
+      text-align: center;
+      padding: 1rem;
+      color: #4b5563;
+    }
+    .no-more {
+      text-align: center;
+      padding: 1rem;
+      color: #4b5563;
+    }
+    .error {
+      text-align: center;
+      padding: 1rem;
+      color: #dc2626;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>NEJM 한국어 뉴스</h1>
-    <div class="article">
-      <h2>
-국소 진행성 두경부암에 대한 신보조 및 보조 펨브롤리주맙</h2>
-      <p>원제: New Advances in Cancer Treatment</p>
-      <p>표준 치료에 신보조요법 및 보조요법 펨브롤리주맙을 추가한 결과, 국소 진행성 두경부 편평세포암(HNSCC) 환자의 무사건 생존율이 유의미하게 향상되었습니다. 신보조요법 펨브롤리주맙은 수술 완료 가능성에 영향을 미치지 않았습니다. 새로운 안전성 신호는 확인되지 않았습니다. (머크의 자회사인 머크 샤프 앤드 도메(Merck Sharp and Dohme)에서 지원)</p>
-      <p>게재일: 2025-07-01</p>
-      <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa2415434?query=featured_home">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>심혈관 질환 예방</h2>
-      <p>원제: Cardiovascular Disease Prevention</p>
-      <p>최신 NEJM 호에서 심혈관 질환 예방을 위한 새로운 지침이 논의되었습니다.</p>
-      <p>게재일: 2025-06-28</p>
-      <a href="https://www.nejm.org/example2" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>당뇨병 관리의 혁신</h2>
-      <p>원제: Innovations in Diabetes Care</p>
-      <p>NEJM의 최신 연구는 당뇨병 환자를 위한 새로운 치료법을 소개합니다.</p>
-      <p>게재일: 2025-06-20</p>
-      <a href="https://www.nejm.org/example3" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>신경계 질환 연구</h2>
-      <p>원제: Advances in Neurological Research</p>
-      <p>NEJM에 게재된 논문은 알츠하이머병 치료의 새로운 가능성을 탐구합니다.</p>
-      <p>게재일: 2025-06-15</p>
-      <a href="https://www.nejm.org/example4" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>감염병 대응 전략</h2>
-      <p>원제: Strategies for Infectious Disease Control</p>
-      <p>NEJM 연구는 전염병 예방을 위한 새로운 백신 전략을 제안합니다.</p>
-      <p>게재일: 2025-06-10</p>
-      <a href="https://www.nejm.org/example5" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>소아 질환의 최신 치료법</h2>
-      <p>원제: Latest Treatments for Pediatric Diseases</p>
-      <p>NEJM 논문은 소아 환자를 위한 새로운 치료법을 다룹니다.</p>
-      <p>게재일: 2025-06-05</p>
-      <a href="https://www.nejm.org/example6" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>정신 건강 개선 연구</h2>
-      <p>원제: Research on Mental Health Improvement</p>
-      <p>NEJM의 연구는 우울증 치료를 위한 새로운 접근법을 제시합니다.</p>
-      <p>게재일: 2025-06-01</p>
-      <a href="https://www.nejm.org/example7" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>심장 수술의 발전</h2>
-      <p>원제: Advances in Cardiac Surgery</p>
-      <p>NEJM에 게재된 논문은 심장 수술 기술의 최신 발전을 다룹니다.</p>
-      <p>게재일: 2025-05-28</p>
-      <a href="https://www.nejm.org/example8" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>간 질환 치료 혁신</h2>
-      <p>원제: Innovations in Liver Disease Treatment</p>
-      <p>NEJM 연구는 간 질환 치료를 위한 새로운 약물을 소개합니다.</p>
-      <p>게재일: 2025-05-20</p>
-      <a href="https://www.nejm.org/example9" target="_blank">원문 보기</a>
-    </div>
-    <div class="article">
-      <h2>호흡기 질환 연구</h2>
-      <p>원제: Research on Respiratory Diseases</p>
-      <p>NEJM 논문은 만성 폐쇄성 폐질환 치료의 새로운 가능성을 탐구합니다.</p>
-      <p>게재일: 2025-05-15</p>
-      <a href="https://www.nejm.org/example10" target="_blank">원문 보기</a>
-    </div>
+    <div id="articles"></div>
+    <div id="loading" class="loading">로딩 중...</div>
+    <div id="no-more" class="no-more" style="display: none;">더 이상 기사가 없습니다.</div>
+    <div id="error" class="error" style="display: none;"></div>
   </div>
+
+  <script>
+    // DeepL API 키 (발급받은 키로 교체)
+    const DEEPL_API_KEY = '377ab2dc-88e7-42e5-a2b3-bc5f2735ed7f:fx'; // 여기에 DeepL API 키 입력
+    const RSS_FEED_URL = 'https://www.nejm.org/action/showFeed?type=mr&feed=rss';
+    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/'; // CORS 프록시
+
+    let page = 1;
+    const perPage = 3;
+    let isLoading = false;
+    let hasMore = true;
+    let allArticles = [];
+
+    // DeepL API로 텍스트 번역
+    async function translateText(text) {
+      try {
+        const response = await fetch(`${CORS_PROXY}https://api-free.deepl.com/v2/translate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `DeepL-Auth-Key ${DEEPL_API_KEY}`
+          },
+          body: new URLSearchParams({
+            text: text,
+            target_lang: 'KO'
+          })
+        });
+        const data = await response.json();
+        return data.translations[0].text;
+      } catch (error) {
+        console.error('Translation error:', error);
+        return text; // 오류 시 원문 반환
+      }
+    }
+
+    // RSS 피드 파싱
+    async function fetchArticles() {
+      try {
+        const response = await fetch(`${CORS_PROXY}${RSS_FEED_URL}`);
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        const articles = [];
+        let id = 1;
+
+        for (let item of items) {
+          const title = item.querySelector('title').textContent;
+          const description = item.querySelector('description').textContent.replace(/<[^>]+>/g, '');
+          const pubDate = item.querySelector('pubDate').textContent;
+          const link = item.querySelector('link').textContent;
+
+          // DeepL로 번역
+          const koreanTitle = await translateText(title);
+          const koreanSummary = await translateText(description);
+
+          articles.push({
+            id: id++,
+            title,
+            koreanTitle,
+            summary: description,
+            koreanSummary,
+            date: new Date(pubDate).toLocaleDateString('ko-KR'),
+            url: link
+          });
+        }
+        return articles;
+      } catch (error) {
+        console.error('RSS fetch error:', error);
+        document.getElementById('error').textContent = '기사를 불러오는 데 실패했습니다.';
+        document.getElementById('error').style.display = 'block';
+        return [];
+      }
+    }
+
+    // 기사 렌더링
+    function renderArticles(articles) {
+      const articlesContainer = document.getElementById('articles');
+      articles.forEach(article => {
+        const articleDiv = document.createElement('div');
+        articleDiv.className = 'article';
+        articleDiv.innerHTML = `
+          <h2>${article.koreanTitle}</h2>
+          <p>원제: ${article.title}</p>
+          <p>${article.koreanSummary}</p>
+          <p>게재일: ${article.date}</p>
+          <a href="${article.url}" target="_blank">원문 보기</a>
+        `;
+        articlesContainer.appendChild(articleDiv);
+      });
+    }
+
+    // 기사 로드
+    async function loadArticles() {
+      if (isLoading || !hasMore) return;
+      isLoading = true;
+      document.getElementById('loading').style.display = 'block';
+
+      if (page === 1) {
+        allArticles = await fetchArticles();
+      }
+
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      const newArticles = allArticles.slice(start, end);
+
+      if (newArticles.length > 0) {
+        renderArticles(newArticles);
+        page++;
+      }
+
+      if (end >= allArticles.length) {
+        hasMore = false;
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('no-more').style.display = 'block';
+      } else {
+        isLoading = false;
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    // Intersection Observer로 스크롤 감지
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          loadArticles();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(document.getElementById('loading'));
+
+    // 초기 기사 로드
+    loadArticles();
+  </script>
 </body>
 </html>
